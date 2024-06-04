@@ -28,7 +28,10 @@ printf "label: gpt\n,550M,U\n,,\n" | sfdisk "$MY_DISK"
 
 # Format and mount partitions
 if [ "$ENCRYPTED" = "y" ]; then
-	yes "$CRYPTPASS" | cryptsetup -q luksFormat "$PART2"
+	if [ "$USE_EXISTING_LUKS" = "n" ]; then
+		yes "$CRYPTPASS" | cryptsetup -q luksFormat "$PART2"
+	fi
+
 	yes "$CRYPTPASS" | cryptsetup open "$PART2" root
 fi
 

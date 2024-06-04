@@ -73,6 +73,16 @@ case "$MY_DISK" in
 	;;
 esac
 
+# If install partition is already LUKS
+if [[ $(sudo blkid -o value -s TYPE $PART2) == "crypto_LUKS" ]]; then
+	until [ "$USE_EXISTING_LUKS" ]; do
+		printf "$PART2 is a LUKS partition, would you like to use this instead of creating a new one? (y/N): " && read -r USE_EXISTING_LUKS
+		[ ! "$USE_EXISTING_LUKS" ] && USE_EXISTING_LUKS="n"
+	done
+else
+	USE_EXISTING_LUKS="n"
+fi
+
 # Swap size
 until (echo "$SWAP_SIZE" | grep -Eq "^[0-9]+$") && [ "$SWAP_SIZE" -gt 0 ] && [ "$SWAP_SIZE" -lt 97 ]; do
 	printf "Size of swap partition in GiB (4): " && read -r SWAP_SIZE
@@ -86,12 +96,14 @@ until [ "$MY_FS" = "btrfs" ] || [ "$MY_FS" = "ext4" ]; do
 done
 
 # Encrypt or not
+if [ "$USE_EXISTING_LUKS" = "n" ]; then
 until [ "$ENCRYPTED" ]; do
 	printf "Encrypt? (y/N): " && read -r ENCRYPTED
 	[ ! "$ENCRYPTED" ] && ENCRYPTED="n"
 done
+fi
 
-if [ "$ENCRYPTED" = "y" ]; then
+if [ "$USE_EXISTING_LUKS" = "y" ] || [ "$ENCRYPTED" = "y" ]; then
 	MY_ROOT="/dev/mapper/root"
 	CRYPTPASS=$(confirm_password "encryption password")
 else
@@ -159,7 +171,7 @@ if [ "$CONFIRM" = "y" ]; then
 
 # Install
 sudo MY_INIT="$MY_INIT" MY_DISK="$MY_DISK" PART1="$PART1" PART2="$PART2" \
-	SWAP_SIZE="$SWAP_SIZE" MY_FS="$MY_FS" ENCRYPTED="$ENCRYPTED" MY_ROOT="$MY_ROOT" \
+		SWAP_SIZE="$SWAP_SIZE" MY_FS="$MY_FS" ENCRYPTED="$ENCRYPTED" USE_EXISTING_LUKS=$USE_EXISTING_LUKS MY_ROOT="$MY_ROOT" \
 	CRYPTPASS="$CRYPTPASS" \
 	./src/installer.sh
 
