@@ -113,7 +113,49 @@ done
 # Users
 ROOT_PASSWORD=$(confirm_password "root password")
 
-printf "\nDone with configuration. Installing...\n\n"
+# print config
+echo ""
+echo "-----------------------"
+echo ""
+echo "Confirm config:"
+echo ""
+echo "Installation disk destination: $MY_DISK"
+echo "Boot partition: $PART1"
+
+printf "Root partition: $PART2 ($MY_FS)"
+
+if [ "$USE_EXISTING_LUKS" = "y" ]; then
+	printf " [use existing LUKS]"
+elif [ "$ENCRYPTED" = "y" ]; then
+	printf " [encrypted] (pass: $CRYPTPASS)"
+
+	if [ "$PREPARE_ENCRYPTION" = "y" ]; then
+		printf " (prep)"
+	fi
+fi
+printf "\n"
+# if [ "$MY_FS" = "btrfs" ]; then
+# 	echo "    subvolumes:"
+# fi
+
+echo "Swap size: $SWAP_SIZE GB"
+echo ""
+echo "Init system: $MY_INIT"
+echo "Language: $LANGCODE"
+echo "Region: $REGION_CITY"
+echo "Hostname: $MY_HOSTNAME"
+echo "Root password: $ROOT_PASSWORD"
+echo ""
+echo "-----------------------"
+echo ""
+
+until [ "$CONFIRM" ]; do
+	printf "Is this correct, ready for installation? (y/N): " && read -r CONFIRM
+	[ ! "$CONFIRM" ] && CONFIRM="n"
+done
+
+if [ "$CONFIRM" = "y" ]; then
+	printf "\nDone with configuration. Installing...\n"
 
 # Install
 sudo MY_INIT="$MY_INIT" MY_DISK="$MY_DISK" PART1="$PART1" PART2="$PART2" \
@@ -128,3 +170,6 @@ sudo cp src/iamchroot.sh /mnt/root/ &&
 		ROOT_PASSWORD="$ROOT_PASSWORD" LANGCODE="$LANGCODE" MY_KEYMAP="$MY_KEYMAP" \
 		artix-chroot /mnt sh -ec './root/iamchroot.sh; rm /root/iamchroot.sh; exit' &&
 	printf '\nYou may now poweroff.\n'
+else
+	printf "\ninstallation cancelled\n"
+fi
