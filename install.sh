@@ -97,10 +97,10 @@ done
 
 # Encrypt or not
 if [ "$USE_EXISTING_LUKS" = "n" ]; then
-until [ "$ENCRYPTED" ]; do
-	printf "Encrypt? (y/N): " && read -r ENCRYPTED
-	[ ! "$ENCRYPTED" ] && ENCRYPTED="n"
-done
+	until [ "$ENCRYPTED" ]; do
+		printf "Encrypt? (y/N): " && read -r ENCRYPTED
+		[ ! "$ENCRYPTED" ] && ENCRYPTED="n"
+	done
 
 	# Prepare Encryption or not
 	until [ "$PREPARE_ENCRYPTION" ]; do
@@ -175,14 +175,14 @@ done
 if [ "$CONFIRM" = "y" ]; then
 	printf "\nDone with configuration. Installing...\n"
 
-# Install
-sudo MY_INIT="$MY_INIT" MY_DISK="$MY_DISK" PART1="$PART1" PART2="$PART2" \
+	# Install
+	sudo MY_INIT="$MY_INIT" MY_DISK="$MY_DISK" PART1="$PART1" PART2="$PART2" \
 		SWAP_SIZE="$SWAP_SIZE" MY_FS="$MY_FS" ENCRYPTED="$ENCRYPTED" USE_EXISTING_LUKS=$USE_EXISTING_LUKS PREPARE_ENCRYPTION=$PREPARE_ENCRYPTION MY_ROOT="$MY_ROOT" \
-	CRYPTPASS="$CRYPTPASS" \
-	./src/installer.sh
+		CRYPTPASS="$CRYPTPASS" \
+		./src/installer.sh
 
-# Chroot
-sudo cp src/iamchroot.sh /mnt/root/ &&
+	# Chroot
+	sudo cp src/iamchroot.sh /mnt/root/ &&
 	sudo MY_INIT="$MY_INIT" PART2="$PART2" MY_FS="$MY_FS" ENCRYPTED="$ENCRYPTED" \
 		REGION_CITY="$REGION_CITY" MY_HOSTNAME="$MY_HOSTNAME" CRYPTPASS="$CRYPTPASS" \
 		ROOT_PASSWORD="$ROOT_PASSWORD" LANGCODE="$LANGCODE" MY_KEYMAP="$MY_KEYMAP" \
