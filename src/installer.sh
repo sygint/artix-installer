@@ -28,6 +28,13 @@ printf "label: gpt\n,550M,U\n,,\n" | sfdisk "$MY_DISK"
 
 # Format and mount partitions
 if [ "$ENCRYPTED" = "y" ]; then
+	if [ "$USE_EXISTING_LUKS" = "n" ] && [ "$PREPARE_ENCRYPTION" = "y" ]; then
+		echo "Preparing $PART2 for LUKS by zeroing parition"
+		yes | cryptsetup open --type plain -d /dev/urandom --sector-size 4096 "$PART2" to_be_wiped
+		dd if=/dev/zero of=/dev/mapper/to_be_wiped status=progress bs=1M
+		cryptsetup close to_be_wiped
+	fi
+
 	if [ "$USE_EXISTING_LUKS" = "n" ]; then
 		echo "Encrypting partition $PART2"
 		yes "$CRYPTPASS" | cryptsetup -q luksFormat "$PART2"

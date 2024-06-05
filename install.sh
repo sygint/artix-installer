@@ -101,6 +101,12 @@ until [ "$ENCRYPTED" ]; do
 	printf "Encrypt? (y/N): " && read -r ENCRYPTED
 	[ ! "$ENCRYPTED" ] && ENCRYPTED="n"
 done
+
+	# Prepare Encryption or not
+	until [ "$PREPARE_ENCRYPTION" ]; do
+		printf "Prepare for encryption by zeroing drive? (y/N): " && read -r PREPARE_ENCRYPTION
+		[ ! "$PREPARE_ENCRYPTION" ] && PREPARE_ENCRYPTION="n"
+	done
 fi
 
 if [ "$USE_EXISTING_LUKS" = "y" ] || [ "$ENCRYPTED" = "y" ]; then
@@ -171,7 +177,7 @@ if [ "$CONFIRM" = "y" ]; then
 
 # Install
 sudo MY_INIT="$MY_INIT" MY_DISK="$MY_DISK" PART1="$PART1" PART2="$PART2" \
-		SWAP_SIZE="$SWAP_SIZE" MY_FS="$MY_FS" ENCRYPTED="$ENCRYPTED" USE_EXISTING_LUKS=$USE_EXISTING_LUKS MY_ROOT="$MY_ROOT" \
+		SWAP_SIZE="$SWAP_SIZE" MY_FS="$MY_FS" ENCRYPTED="$ENCRYPTED" USE_EXISTING_LUKS=$USE_EXISTING_LUKS PREPARE_ENCRYPTION=$PREPARE_ENCRYPTION MY_ROOT="$MY_ROOT" \
 	CRYPTPASS="$CRYPTPASS" \
 	./src/installer.sh
 
