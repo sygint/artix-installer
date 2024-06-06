@@ -65,11 +65,18 @@ elif [ "$MY_FS" = "btrfs" ]; then
 	btrfs subvolume create /mnt/swap
 	umount -R /mnt
 
+	MOUNT_OPTIONS="compress=zstd"
+
 	# Mount subvolumes
-	mount -t btrfs -o compress=zstd,subvol=root "$MY_ROOT" /mnt
-	mkdir /mnt/home
-	mkdir /mnt/swap
-	mount -t btrfs -o compress=zstd,subvol=home "$MY_ROOT" /mnt/home
+	echo "mounting root: mount -t btrfs -o $MOUNT_OPTIONS,subvol=root "$MY_ROOT" /mnt"
+	mount -t btrfs -o $MOUNT_OPTIONS,subvol=root "$MY_ROOT" /mnt
+
+	mkdir -p /mnt/{home,swap}
+
+	echo "mounting home: mount -t btrfs -o $MOUNT_OPTIONS,subvol=home "$MY_ROOT" /mnt/home"
+	mount -t btrfs -o $MOUNT_OPTIONS,subvol=home "$MY_ROOT" /mnt/home
+
+	echo "mounting home: swap -t btrfs -o noatime,nodatacow,subvol=swap "$MY_ROOT" /mnt/swap"
 	mount -t btrfs -o noatime,nodatacow,subvol=swap "$MY_ROOT" /mnt/swap
 
 	# Create swapfile
