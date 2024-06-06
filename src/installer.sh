@@ -62,6 +62,7 @@ elif [ "$MY_FS" = "btrfs" ]; then
 	mount "$MY_ROOT" /mnt
 	btrfs subvolume create /mnt/root
 	btrfs subvolume create /mnt/home
+	btrfs subvolume create /mnt/pkg
 	btrfs subvolume create /mnt/swap
 	umount -R /mnt
 
@@ -71,10 +72,13 @@ elif [ "$MY_FS" = "btrfs" ]; then
 	echo "mounting root: mount -t btrfs -o $MOUNT_OPTIONS,subvol=root "$MY_ROOT" /mnt"
 	mount -t btrfs -o $MOUNT_OPTIONS,subvol=root "$MY_ROOT" /mnt
 
-	mkdir -p /mnt/{home,swap}
+	mkdir -p /mnt/{home,var/cache/pacman/pkg,swap}
 
 	echo "mounting home: mount -t btrfs -o $MOUNT_OPTIONS,subvol=home "$MY_ROOT" /mnt/home"
 	mount -t btrfs -o $MOUNT_OPTIONS,subvol=home "$MY_ROOT" /mnt/home
+
+	echo "mounting pkg: mount -t btrfs -o $MOUNT_OPTIONS,subvol=pkg "$MY_ROOT" /mnt/var/cache/pacman/pkg"
+	sudo mount -t btrfs -o $MOUNT_OPTIONS,subvol=pkg "$MY_ROOT" /mnt/var/cache/pacman/pkg
 
 	echo "mounting home: swap -t btrfs -o noatime,nodatacow,subvol=swap "$MY_ROOT" /mnt/swap"
 	mount -t btrfs -o noatime,nodatacow,subvol=swap "$MY_ROOT" /mnt/swap
