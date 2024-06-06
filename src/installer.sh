@@ -63,6 +63,7 @@ elif [ "$MY_FS" = "btrfs" ]; then
 	btrfs subvolume create /mnt/root
 	btrfs subvolume create /mnt/home
 	btrfs subvolume create /mnt/pkg
+	btrfs subvolume create /mnt/snapshots
 	btrfs subvolume create /mnt/swap
 	umount -R /mnt
 
@@ -72,13 +73,16 @@ elif [ "$MY_FS" = "btrfs" ]; then
 	echo "mounting root: mount -t btrfs -o $MOUNT_OPTIONS,subvol=root "$MY_ROOT" /mnt"
 	mount -t btrfs -o $MOUNT_OPTIONS,subvol=root "$MY_ROOT" /mnt
 
-	mkdir -p /mnt/{home,var/cache/pacman/pkg,swap}
+	mkdir -p /mnt/{home,var/cache/pacman/pkg,.snapshots,swap}
 
 	echo "mounting home: mount -t btrfs -o $MOUNT_OPTIONS,subvol=home "$MY_ROOT" /mnt/home"
 	mount -t btrfs -o $MOUNT_OPTIONS,subvol=home "$MY_ROOT" /mnt/home
 
 	echo "mounting pkg: mount -t btrfs -o $MOUNT_OPTIONS,subvol=pkg "$MY_ROOT" /mnt/var/cache/pacman/pkg"
 	sudo mount -t btrfs -o $MOUNT_OPTIONS,subvol=pkg "$MY_ROOT" /mnt/var/cache/pacman/pkg
+
+	echo "mounting snapshots: mount -t btrfs -o $MOUNT_OPTIONS,subvol=snapshots "$MY_ROOT" $MY_ROOT /mnt/.snapshots"
+	sudo mount -t btrfs -o $MOUNT_OPTIONS,subvol=snapshots $MY_ROOT /mnt/.snapshots
 
 	echo "mounting home: swap -t btrfs -o noatime,nodatacow,subvol=swap "$MY_ROOT" /mnt/swap"
 	mount -t btrfs -o noatime,nodatacow,subvol=swap "$MY_ROOT" /mnt/swap
